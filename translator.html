@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中英文翻译器 | Chinese-English Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .language-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .language-btn {
+            padding: 12px 30px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .language-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .language-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .translation-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .translation-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .text-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .text-box label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.6;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .translate-btn {
+            padding: 15px 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .translate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .translate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-btn {
+            padding: 15px 30px;
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .status {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .loading {
+            color: #667eea;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        .swap-btn {
+            background: none;
+            border: 2px solid #667eea;
+            color: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swap-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 中英文翻译器</h1>
+        
+        <div class="language-selector">
+            <button class="language-btn active" id="zhToEn" onclick="setDirection('zh-to-en')">中文 → 英文</button>
+            <button class="language-btn" id="enToZh" onclick="setDirection('en-to-zh')">英文 → 中文</button>
+        </div>
+
+        <div class="translation-area">
+            <div class="text-box">
+                <label id="sourceLabel">请输入中文文本</label>
+                <textarea id="sourceText" placeholder="在此输入要翻译的文本..."></textarea>
+            </div>
+            
+            <div class="text-box">
+                <label id="targetLabel">翻译结果</label>
+                <textarea id="targetText" readonly placeholder="翻译结果将显示在这里..."></textarea>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="swap-btn" onclick="swapLanguages()" title="交换语言">⇄</button>
+            <button class="translate-btn" id="translateBtn" onclick="translate()">翻译</button>
+            <button class="clear-btn" onclick="clearText()">清空</button>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let currentDirection = 'zh-to-en';
+
+        function setDirection(direction) {
+            currentDirection = direction;
+            
+            const zhToEnBtn = document.getElementById('zhToEn');
+            const enToZhBtn = document.getElementById('enToZh');
+            const sourceLabel = document.getElementById('sourceLabel');
+            const targetLabel = document.getElementById('targetLabel');
+            const sourceText = document.getElementById('sourceText');
+            
+            if (direction === 'zh-to-en') {
+                zhToEnBtn.classList.add('active');
+                enToZhBtn.classList.remove('active');
+                sourceLabel.textContent = '请输入中文文本';
+                targetLabel.textContent = '英文翻译';
+                sourceText.placeholder = '在此输入中文...';
+            } else {
+                enToZhBtn.classList.add('active');
+                zhToEnBtn.classList.remove('active');
+                sourceLabel.textContent = 'Please enter English text';
+                targetLabel.textContent = '中文翻译';
+                sourceText.placeholder = 'Enter English text here...';
+            }
+            
+            document.getElementById('targetText').value = '';
+            document.getElementById('status').textContent = '';
+        }
+
+        function swapLanguages() {
+            const sourceText = document.getElementById('sourceText').value;
+            const targetText = document.getElementById('targetText').value;
+            
+            if (currentDirection === 'zh-to-en') {
+                setDirection('en-to-zh');
+                document.getElementById('sourceText').value = targetText;
+                document.getElementById('targetText').value = sourceText;
+            } else {
+                setDirection('zh-to-en');
+                document.getElementById('sourceText').value = targetText;
+                document.getElementById('targetText').value = sourceText;
+            }
+        }
+
+        function clearText() {
+            document.getElementById('sourceText').value = '';
+            document.getElementById('targetText').value = '';
+            document.getElementById('status').textContent = '';
+        }
+
+        async function translate() {
+            const sourceText = document.getElementById('sourceText').value.trim();
+            const statusDiv = document.getElementById('status');
+            const translateBtn = document.getElementById('translateBtn');
+            const targetText = document.getElementById('targetText');
+            
+            if (!sourceText) {
+                statusDiv.textContent = '⚠️ 请输入要翻译的文本';
+                statusDiv.className = 'status error';
+                return;
+            }
+
+            translateBtn.disabled = true;
+            statusDiv.textContent = '⏳ 正在翻译...';
+            statusDiv.className = 'status loading';
+            targetText.value = '';
+
+            try {
+                const sourceLang = currentDirection === 'zh-to-en' ? 'zh' : 'en';
+                const targetLang = currentDirection === 'zh-to-en' ? 'en' : 'zh';
+                
+                // Using MyMemory Translation API (free, no key required for basic usage)
+                const response = await fetch(
+                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=${sourceLang}|${targetLang}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('Translation failed');
+                }
+                
+                const data = await response.json();
+                
+                if (data.responseStatus === 200) {
+                    targetText.value = data.responseData.translatedText;
+                    statusDiv.textContent = '✅ 翻译完成';
+                    statusDiv.className = 'status';
+                } else {
+                    throw new Error(data.responseDetails || 'Translation failed');
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+                statusDiv.textContent = '❌ 翻译失败：' + error.message;
+                statusDiv.className = 'status error';
+                
+                // Fallback: Show a message that this is a demo
+                targetText.value = '[演示模式] 这是一个翻译示例。\n实际使用时请连接翻译 API。';
+            } finally {
+                translateBtn.disabled = false;
+            }
+        }
+
+        // Allow Ctrl+Enter to translate
+        document.getElementById('sourceText').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                translate();
+            }
+        });
+    </script>
+</body>
+</html>
